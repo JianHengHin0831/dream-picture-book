@@ -169,44 +169,55 @@
         <div
           v-if="currentPhase === 'chat'"
           class="animate-fade-in flex flex-col"
-          style="height: calc(100vh - 300px)"
+          :style="{
+            height: 'calc(100vh - 300px)',
+            minHeight: '500px',
+          }"
         >
-          <div class="grid md:grid-cols-3 gap-6 h-full overflow-hidden">
+          <div
+            class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 h-full overflow-hidden"
+          >
             <!-- Left: Story Illustration Gallery (Horizontal Carousel) -->
-            <div class="md:col-span-1 h-full flex flex-col gap-4">
-              <!-- Character Card - Sticky -->
+            <div
+              class="md:col-span-1 h-40 md:h-full flex flex-col gap-2 md:gap-4 order-2 md:order-1"
+            >
+              <!-- Character Card -->
               <div
-                class="bg-gradient-to-br from-amber-50/70 via-rose-50/70 to-orange-50/70 rounded-2xl p-5 border-2 border-rose-200/50 shadow-lg flex-shrink-0"
+                class="bg-gradient-to-br from-amber-50/70 via-rose-50/70 to-orange-50/70 rounded-2xl p-3 md:p-5 border-2 border-rose-200/50 shadow-lg flex-shrink-0"
               >
-                <div class="text-center space-y-2">
+                <div class="text-center space-y-1 md:space-y-2">
                   <h3
-                    class="text-2xl font-bold text-transparent bg-gradient-to-r from-rose-500 via-orange-500 to-amber-500 bg-clip-text"
+                    class="text-lg md:text-2xl font-bold text-transparent bg-gradient-to-r from-rose-500 via-orange-500 to-amber-500 bg-clip-text"
                   >
                     {{ characterName }}
                   </h3>
-                  <p class="text-sm text-gray-600 italic">
+                  <p
+                    class="text-xs md:text-sm text-gray-600 italic line-clamp-2"
+                  >
                     {{ characterDescription }}
                   </p>
                 </div>
               </div>
 
               <!-- Image Carousel Container -->
-              <div class="flex-1 flex flex-col gap-2">
+              <div class="flex-1 flex flex-col gap-1 md:gap-2 hidden md:flex">
                 <!-- Carousel Navigation -->
-                <div class="flex justify-between items-center px-2">
+                <div
+                  class="flex justify-between items-center px-1 md:px-2 gap-1"
+                >
                   <button
                     @click="scrollCarouselLeft"
-                    class="bg-rose-300 hover:bg-rose-400 text-white p-2 rounded-full transition-colors"
+                    class="bg-rose-300 hover:bg-rose-400 text-white p-1.5 md:p-2 rounded-full transition-colors text-sm md:text-base"
                     :disabled="currentImageIndex === 0"
                   >
                     ←
                   </button>
-                  <p class="text-xs text-gray-500">
-                    Image {{ currentImageIndex + 1 }} of {{ totalImages }}
+                  <p class="text-xs text-gray-500 flex-1 text-center">
+                    {{ currentImageIndex + 1 }}/{{ totalImages }}
                   </p>
                   <button
                     @click="scrollCarouselRight"
-                    class="bg-rose-300 hover:bg-rose-400 text-white p-2 rounded-full transition-colors"
+                    class="bg-rose-300 hover:bg-rose-400 text-white p-1.5 md:p-2 rounded-full transition-colors text-sm md:text-base"
                     :disabled="currentImageIndex >= totalImages - 1"
                   >
                     →
@@ -226,12 +237,12 @@
                       class="w-full flex-shrink-0 rounded-2xl overflow-hidden"
                     >
                       <div
-                        class="bg-gradient-to-br from-blue-50/50 to-cyan-50/50 rounded-2xl p-3 border-2 border-blue-200/50 shadow-md h-full flex flex-col"
+                        class="bg-gradient-to-br from-blue-50/50 to-cyan-50/50 rounded-2xl p-2 md:p-3 border-2 border-blue-200/50 shadow-md h-full flex flex-col"
                       >
                         <p
-                          class="text-xs text-center text-gray-500 mb-2 font-semibold"
+                          class="text-xs text-center text-gray-500 mb-1 md:mb-2 font-semibold line-clamp-1"
                         >
-                          📖 Your Story Unfolds
+                          📖 Your Story
                         </p>
                         <img
                           :src="uploadedImage"
@@ -247,12 +258,12 @@
                       class="w-full flex-shrink-0 rounded-2xl overflow-hidden"
                     >
                       <div
-                        class="bg-white/80 backdrop-blur rounded-2xl p-3 shadow-lg border-2 border-rose-200/50 h-full flex flex-col"
+                        class="bg-white/80 backdrop-blur rounded-2xl p-2 md:p-3 shadow-lg border-2 border-rose-200/50 h-full flex flex-col"
                       >
                         <p
-                          class="text-xs text-center text-gray-500 mb-2 font-semibold"
+                          class="text-xs text-center text-gray-500 mb-1 md:mb-2 font-semibold line-clamp-1"
                         >
-                          ✨ Chapter 1 - The Beginning ✨
+                          ✨ Ch.1 ✨
                         </p>
                         <img
                           :src="generatedImageUrl"
@@ -269,12 +280,12 @@
                       class="w-full flex-shrink-0 rounded-2xl overflow-hidden"
                     >
                       <div
-                        class="bg-white/80 backdrop-blur rounded-2xl p-3 shadow-lg border-2 border-rose-200/50 h-full flex flex-col"
+                        class="bg-white/80 backdrop-blur rounded-2xl p-2 md:p-3 shadow-lg border-2 border-rose-200/50 h-full flex flex-col"
                       >
                         <p
-                          class="text-xs text-center text-gray-500 mb-2 font-semibold"
+                          class="text-xs text-center text-gray-500 mb-1 md:mb-2 font-semibold line-clamp-1"
                         >
-                          ✨ Chapter {{ index + 2 }} ✨
+                          ✨ Ch.{{ index + 2 }} ✨
                         </p>
                         <img
                           :src="imgUrl"
@@ -289,18 +300,20 @@
             </div>
 
             <!-- Right: Chat Messages -->
-            <div class="md:col-span-2 flex flex-col h-full overflow-hidden">
+            <div
+              class="md:col-span-2 flex flex-col h-full overflow-hidden order-1 md:order-2"
+            >
               <!-- Chat History -->
               <div
-                class="bg-gradient-to-b from-purple-50/30 via-pink-50/20 to-transparent p-6 rounded-2xl space-y-4 overflow-y-auto border-2 border-purple-200/30 flex-1 min-h-0"
+                class="bg-gradient-to-b from-purple-50/30 via-pink-50/20 to-transparent p-3 md:p-6 rounded-2xl space-y-2 md:space-y-4 overflow-y-auto border-2 border-purple-200/30 flex-1 min-h-0"
                 ref="chatContainer"
               >
                 <div
                   v-if="chatMessages.length === 0"
-                  class="text-center text-gray-400 py-12"
+                  class="text-center text-gray-400 py-6 md:py-12 text-sm md:text-base"
                 >
-                  <p class="text-lg">
-                    ✨ {{ characterName }} is waiting to meet you... ✨
+                  <p class="text-base md:text-lg">
+                    ✨ {{ characterName }} is waiting... ✨
                   </p>
                 </div>
 
@@ -316,46 +329,46 @@
                 >
                   <div
                     :class="[
-                      'max-w-[80%] px-5 py-3 rounded-2xl shadow-sm',
+                      'max-w-[85%] md:max-w-[80%] px-3 md:px-5 py-2 md:py-3 rounded-2xl shadow-sm text-xs md:text-sm',
                       msg.role === 'user'
                         ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white rounded-br-sm'
                         : 'bg-gradient-to-r from-amber-100 to-orange-100 text-gray-800 rounded-bl-sm border border-orange-200/50',
                     ]"
                     v-if="msg.content"
                   >
-                    <p class="text-sm leading-relaxed">{{ msg.content }}</p>
+                    <p class="leading-relaxed">{{ msg.content }}</p>
                   </div>
                 </div>
               </div>
 
               <!-- Input Area - Fixed at Bottom -->
               <div
-                class="bg-gradient-to-r from-purple-50/50 to-pink-50/50 rounded-2xl p-4 border-2 border-purple-200/50 flex-shrink-0 mt-4"
+                class="bg-gradient-to-r from-purple-50/50 to-pink-50/50 rounded-2xl p-2 md:p-4 border-2 border-purple-200/50 flex-shrink-0 mt-2 md:mt-4"
               >
-                <div class="flex gap-2 flex-col">
-                  <div class="flex gap-2">
+                <div class="flex gap-1 md:gap-2 flex-col">
+                  <div class="flex gap-1 md:gap-2">
                     <input
                       v-model="userMessage"
                       @keyup.enter="sendMessage"
                       :disabled="isStreaming"
                       type="text"
                       placeholder="Share your thoughts... 💭"
-                      class="flex-1 px-6 py-3 rounded-full border-2 border-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-300 disabled:opacity-50 bg-white/80 backdrop-blur text-gray-700"
+                      class="flex-1 px-3 md:px-6 py-2 md:py-3 rounded-full border-2 border-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-300 disabled:opacity-50 bg-white/80 backdrop-blur text-gray-700 text-xs md:text-base"
                     />
                     <button
                       @click="sendMessage"
                       :disabled="!userMessage.trim() || isStreaming"
-                      class="bg-gradient-to-r from-purple-400 via-pink-400 to-rose-400 text-white px-8 py-3 rounded-full hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 font-medium whitespace-nowrap"
+                      class="bg-gradient-to-r from-purple-400 via-pink-400 to-rose-400 text-white px-3 md:px-8 py-2 md:py-3 rounded-full hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 font-medium whitespace-nowrap text-xs md:text-base"
                     >
                       💫 Send
                     </button>
                   </div>
                   <div class="text-center">
                     <button
-                      @click="reset"
+                      @click="endChat"
                       class="text-xs text-gray-500 hover:text-gray-700 transition-colors underline"
                     >
-                      🔄 Create a new story
+                      � End Chat
                     </button>
                   </div>
                 </div>
@@ -410,10 +423,18 @@
       </main>
     </div>
   </div>
+  <!-- Phase 4: Story Summary Modal Component -->
+  <StorySummaryModal
+    :is-open="currentPhase === 'summary'"
+    :character-name="characterName"
+    :all-images="allSummaryImages"
+    :chat-messages="chatMessages"
+    @create-new="reset"
+  />
 </template>
 
 <script setup>
-import { ref, nextTick, computed } from "vue";
+import { ref, nextTick, computed, watch } from "vue";
 
 // Phases: upload -> story_display -> naming -> chat
 const currentPhase = ref("upload");
@@ -694,6 +715,19 @@ const scrollCarouselRight = () => {
   if (currentImageIndex.value < totalImages.value - 1) {
     currentImageIndex.value++;
   }
+};
+
+// Computed property for all summary images
+const allSummaryImages = computed(() => {
+  const images = [uploadedImage.value];
+  if (generatedImageUrl.value) images.push(generatedImageUrl.value);
+  images.push(...chatImages.value);
+  return images.filter((img) => img); // Filter out null/undefined
+});
+
+// End chat and show summary
+const endChat = () => {
+  currentPhase.value = "summary";
 };
 
 // Reset to initial state
