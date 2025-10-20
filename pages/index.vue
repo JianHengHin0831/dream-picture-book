@@ -1,0 +1,738 @@
+<template>
+  <div
+    class="font-sans min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 text-gray-600 flex flex-col items-center py-10 px-4"
+  >
+    <div class="w-full max-w-4xl mx-auto">
+      <header class="text-center mb-8">
+        <h1
+          class="text-5xl font-bold bg-gradient-to-r from-rose-400 via-orange-400 to-amber-400 bg-clip-text text-transparent mb-3 tracking-wide"
+        >
+          ✨ Dream Picture Book ✨
+        </h1>
+        <p class="text-gray-600 text-lg font-medium">
+          Where everyday moments become heartwarming tales
+        </p>
+        <p class="text-gray-400 text-sm mt-2">
+          Let your objects come alive and share their gentle stories with you
+        </p>
+      </header>
+
+      <main
+        class="bg-white/80 backdrop-blur rounded-2xl shadow-lg p-8 w-full border border-purple-100"
+      >
+        <!-- Phase 1: Image Upload -->
+        <div
+          v-if="currentPhase === 'upload' && !isLoading"
+          class="animate-fade-in"
+        >
+          <label
+            for="file-upload"
+            class="cursor-pointer w-full flex flex-col items-center justify-center border-3 border-dashed border-rose-300 rounded-3xl p-16 bg-gradient-to-br from-amber-50/50 via-rose-50/50 to-orange-50/50 hover:from-amber-100/50 hover:via-rose-100/50 hover:to-orange-100/50 transition-all duration-500 shadow-lg hover:shadow-xl"
+          >
+            <template v-if="!uploadedImage">
+              <div
+                class="bg-gradient-to-r from-rose-400 to-orange-400 p-4 rounded-full mb-6"
+              >
+                <svg
+                  class="w-16 h-16 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  ></path>
+                </svg>
+              </div>
+              <span
+                class="text-2xl font-bold text-transparent bg-gradient-to-r from-rose-500 to-orange-500 bg-clip-text mb-3"
+                >✨ Upload Your Photo ✨</span
+              >
+              <span class="text-gray-500 text-center max-w-md"
+                >Choose a photo of any everyday object - a coffee cup, a book, a
+                plant... anything that holds a special place in your heart</span
+              >
+              <span class="text-sm text-gray-400 mt-4 italic"
+                >🌟 Let's create magic together 🌟</span
+              >
+            </template>
+            <img
+              v-else
+              :src="uploadedImage"
+              alt="Uploaded Preview"
+              class="max-h-80 rounded-2xl shadow-2xl"
+            />
+          </label>
+          <input
+            id="file-upload"
+            type="file"
+            @change="handleFileUpload"
+            class="hidden"
+            accept="image/*"
+          />
+        </div>
+
+        <!-- Phase 2: Story Display & Character Naming -->
+        <div
+          v-if="currentPhase === 'story_display' && !isLoading"
+          class="animate-fade-in space-y-8"
+        >
+          <!-- Story and Image -->
+          <div class="grid md:grid-cols-2 gap-8">
+            <!-- Left: Generated Image -->
+            <div class="space-y-4">
+              <h3
+                class="text-xl font-semibold text-center text-transparent bg-gradient-to-r from-rose-400 to-orange-400 bg-clip-text"
+              >
+                ✨ A Magical World Awaits ✨
+              </h3>
+              <div
+                class="bg-gradient-to-br from-rose-50/50 to-orange-50/50 rounded-2xl p-4 border border-rose-200/50"
+              >
+                <img
+                  :src="generatedImageUrl"
+                  alt="Story Illustration"
+                  class="w-full rounded-xl shadow-lg"
+                />
+              </div>
+            </div>
+
+            <!-- Right: Story with Placeholder -->
+            <div class="space-y-6 flex flex-col justify-center">
+              <div
+                class="bg-gradient-to-br from-amber-50/50 to-yellow-50/50 rounded-2xl p-6 border border-amber-200/50"
+              >
+                <p class="text-gray-700 leading-relaxed text-lg italic">
+                  {{ storyTemplate }}
+                </p>
+              </div>
+
+              <div
+                class="bg-gradient-to-br from-blue-50/50 to-cyan-50/50 rounded-xl p-4 border border-blue-200/50"
+              >
+                <p class="text-sm text-gray-600">
+                  <span class="font-semibold text-blue-600">Character:</span>
+                  {{ characterDescription }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Naming Section -->
+          <div
+            class="bg-gradient-to-r from-purple-50/50 via-pink-50/50 to-rose-50/50 rounded-2xl p-8 border border-purple-200/50 space-y-6"
+          >
+            <div class="text-center">
+              <h2
+                class="text-3xl font-bold text-transparent bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 bg-clip-text mb-3"
+              >
+                💫 Give Your Friend a Name 💫
+              </h2>
+              <p class="text-gray-600 text-lg">
+                This special character is waiting to meet you...
+              </p>
+            </div>
+
+            <div class="max-w-md mx-auto">
+              <input
+                v-model="characterName"
+                type="text"
+                placeholder="Type a warm, gentle name..."
+                @keyup.enter="startChat"
+                class="w-full px-6 py-4 text-lg text-center rounded-full border-2 border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent bg-white/80 backdrop-blur placeholder-purple-300 shadow-sm"
+              />
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-4 justify-center">
+              <button
+                @click="reset"
+                class="px-6 py-3 rounded-full border-2 border-gray-300 text-gray-600 hover:bg-gray-50 transition-all font-medium"
+              >
+                🔄 Start Over
+              </button>
+              <button
+                @click="startChat"
+                :disabled="!characterName.trim()"
+                class="bg-gradient-to-r from-purple-400 via-pink-400 to-rose-400 text-white font-semibold px-10 py-3 rounded-full hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105"
+              >
+                ✨ Let's Talk! ✨
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 3: Interactive Chat -->
+        <div
+          v-if="currentPhase === 'chat'"
+          class="animate-fade-in flex flex-col"
+          style="height: calc(100vh - 300px)"
+        >
+          <div class="grid md:grid-cols-3 gap-6 h-full overflow-hidden">
+            <!-- Left: Story Illustration Gallery (Horizontal Carousel) -->
+            <div class="md:col-span-1 h-full flex flex-col gap-4">
+              <!-- Character Card - Sticky -->
+              <div
+                class="bg-gradient-to-br from-amber-50/70 via-rose-50/70 to-orange-50/70 rounded-2xl p-5 border-2 border-rose-200/50 shadow-lg flex-shrink-0"
+              >
+                <div class="text-center space-y-2">
+                  <h3
+                    class="text-2xl font-bold text-transparent bg-gradient-to-r from-rose-500 via-orange-500 to-amber-500 bg-clip-text"
+                  >
+                    {{ characterName }}
+                  </h3>
+                  <p class="text-sm text-gray-600 italic">
+                    {{ characterDescription }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Image Carousel Container -->
+              <div class="flex-1 flex flex-col gap-2">
+                <!-- Carousel Navigation -->
+                <div class="flex justify-between items-center px-2">
+                  <button
+                    @click="scrollCarouselLeft"
+                    class="bg-rose-300 hover:bg-rose-400 text-white p-2 rounded-full transition-colors"
+                    :disabled="currentImageIndex === 0"
+                  >
+                    ←
+                  </button>
+                  <p class="text-xs text-gray-500">
+                    Image {{ currentImageIndex + 1 }} of {{ totalImages }}
+                  </p>
+                  <button
+                    @click="scrollCarouselRight"
+                    class="bg-rose-300 hover:bg-rose-400 text-white p-2 rounded-full transition-colors"
+                    :disabled="currentImageIndex >= totalImages - 1"
+                  >
+                    →
+                  </button>
+                </div>
+
+                <!-- Carousel Images -->
+                <div class="flex-1 overflow-hidden rounded-2xl">
+                  <div
+                    class="flex transition-transform duration-500 h-full"
+                    :style="{
+                      transform: `translateX(-${currentImageIndex * 100}%)`,
+                    }"
+                  >
+                    <!-- Original Photo -->
+                    <div
+                      class="w-full flex-shrink-0 rounded-2xl overflow-hidden"
+                    >
+                      <div
+                        class="bg-gradient-to-br from-blue-50/50 to-cyan-50/50 rounded-2xl p-3 border-2 border-blue-200/50 shadow-md h-full flex flex-col"
+                      >
+                        <p
+                          class="text-xs text-center text-gray-500 mb-2 font-semibold"
+                        >
+                          📖 Your Story Unfolds
+                        </p>
+                        <img
+                          :src="uploadedImage"
+                          alt="Original"
+                          class="w-full flex-1 object-cover rounded-lg shadow-md"
+                        />
+                      </div>
+                    </div>
+
+                    <!-- First Generated Story Image -->
+                    <div
+                      v-if="generatedImageUrl"
+                      class="w-full flex-shrink-0 rounded-2xl overflow-hidden"
+                    >
+                      <div
+                        class="bg-white/80 backdrop-blur rounded-2xl p-3 shadow-lg border-2 border-rose-200/50 h-full flex flex-col"
+                      >
+                        <p
+                          class="text-xs text-center text-gray-500 mb-2 font-semibold"
+                        >
+                          ✨ Chapter 1 - The Beginning ✨
+                        </p>
+                        <img
+                          :src="generatedImageUrl"
+                          alt="Story illustration"
+                          class="w-full flex-1 object-cover rounded-lg"
+                        />
+                      </div>
+                    </div>
+
+                    <!-- Generated Story Images from Chat -->
+                    <div
+                      v-for="(imgUrl, index) in chatImages"
+                      :key="'img-' + index"
+                      class="w-full flex-shrink-0 rounded-2xl overflow-hidden"
+                    >
+                      <div
+                        class="bg-white/80 backdrop-blur rounded-2xl p-3 shadow-lg border-2 border-rose-200/50 h-full flex flex-col"
+                      >
+                        <p
+                          class="text-xs text-center text-gray-500 mb-2 font-semibold"
+                        >
+                          ✨ Chapter {{ index + 2 }} ✨
+                        </p>
+                        <img
+                          :src="imgUrl"
+                          alt="Story moment"
+                          class="w-full flex-1 object-cover rounded-lg"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Chat Messages -->
+            <div class="md:col-span-2 flex flex-col h-full overflow-hidden">
+              <!-- Chat History -->
+              <div
+                class="bg-gradient-to-b from-purple-50/30 via-pink-50/20 to-transparent p-6 rounded-2xl space-y-4 overflow-y-auto border-2 border-purple-200/30 flex-1 min-h-0"
+                ref="chatContainer"
+              >
+                <div
+                  v-if="chatMessages.length === 0"
+                  class="text-center text-gray-400 py-12"
+                >
+                  <p class="text-lg">
+                    ✨ {{ characterName }} is waiting to meet you... ✨
+                  </p>
+                </div>
+
+                <div
+                  v-for="(msg, index) in chatMessages"
+                  :key="index"
+                  :class="[
+                    'animate-fade-in',
+                    msg.role === 'user'
+                      ? 'flex justify-end'
+                      : 'flex justify-start',
+                  ]"
+                >
+                  <div
+                    :class="[
+                      'max-w-[80%] px-5 py-3 rounded-2xl shadow-sm',
+                      msg.role === 'user'
+                        ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white rounded-br-sm'
+                        : 'bg-gradient-to-r from-amber-100 to-orange-100 text-gray-800 rounded-bl-sm border border-orange-200/50',
+                    ]"
+                    v-if="msg.content"
+                  >
+                    <p class="text-sm leading-relaxed">{{ msg.content }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Input Area - Fixed at Bottom -->
+              <div
+                class="bg-gradient-to-r from-purple-50/50 to-pink-50/50 rounded-2xl p-4 border-2 border-purple-200/50 flex-shrink-0 mt-4"
+              >
+                <div class="flex gap-2 flex-col">
+                  <div class="flex gap-2">
+                    <input
+                      v-model="userMessage"
+                      @keyup.enter="sendMessage"
+                      :disabled="isStreaming"
+                      type="text"
+                      placeholder="Share your thoughts... 💭"
+                      class="flex-1 px-6 py-3 rounded-full border-2 border-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-300 disabled:opacity-50 bg-white/80 backdrop-blur text-gray-700"
+                    />
+                    <button
+                      @click="sendMessage"
+                      :disabled="!userMessage.trim() || isStreaming"
+                      class="bg-gradient-to-r from-purple-400 via-pink-400 to-rose-400 text-white px-8 py-3 rounded-full hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 font-medium whitespace-nowrap"
+                    >
+                      💫 Send
+                    </button>
+                  </div>
+                  <div class="text-center">
+                    <button
+                      @click="reset"
+                      class="text-xs text-gray-500 hover:text-gray-700 transition-colors underline"
+                    >
+                      🔄 Create a new story
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div v-if="isLoading" class="text-center py-12 animate-fade-in">
+          <div class="flex flex-col items-center">
+            <svg
+              class="animate-spin h-12 w-12 text-purple-400 mb-4"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            <p class="text-purple-500 font-semibold">{{ loadingMessage }}</p>
+          </div>
+        </div>
+
+        <!-- Error Message -->
+        <div
+          v-if="error"
+          class="mt-6 p-4 bg-rose-100/60 border border-rose-300 text-rose-700 rounded-xl animate-fade-in"
+        >
+          <p><strong>Oops, something went wrong:</strong></p>
+          <p>{{ error }}</p>
+          <div class="text-center mt-4">
+            <button
+              @click="error = ''"
+              class="bg-rose-400 text-white font-semibold py-2 px-6 rounded-full hover:bg-rose-500 transition-colors"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, nextTick, computed } from "vue";
+
+// Phases: upload -> story_display -> naming -> chat
+const currentPhase = ref("upload");
+
+// State management
+const uploadedImage = ref(null);
+const imageBase64 = ref("");
+const storyTemplate = ref(""); // Story with [CHARACTER] placeholder
+const characterDescription = ref(""); // AI-generated description
+const characterName = ref(""); // User-provided name
+const generatedImageUrl = ref(""); // Initial story illustration
+const chatMessages = ref([]);
+const chatImages = ref([]); // Store images generated during chat
+const userMessage = ref("");
+const isLoading = ref(false);
+const isStreaming = ref(false);
+const error = ref("");
+const loadingMessage = ref("Creating your magical story...");
+const chatContainer = ref(null);
+const currentImageIndex = ref(0); // For carousel navigation
+
+// Handle image upload and generate story
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    uploadedImage.value = e.target.result;
+    imageBase64.value = e.target.result.split(",")[1];
+
+    // Immediately generate story and image
+    await generateStoryAndImage();
+  };
+  reader.readAsDataURL(file);
+};
+
+// Call API to generate story template and image
+const generateStoryAndImage = async () => {
+  isLoading.value = true;
+  loadingMessage.value = "The storyteller is weaving your tale...";
+
+  try {
+    const response = await $fetch("/api/generate", {
+      method: "POST",
+      body: { image: imageBase64.value },
+    });
+
+    storyTemplate.value = response.storyTemplate;
+    characterDescription.value = response.characterDescription;
+    generatedImageUrl.value = response.imageUrl;
+
+    // Move to story display phase
+    currentPhase.value = "story_display";
+  } catch (err) {
+    console.error("Failed to generate story:", err);
+    error.value =
+      err.data?.statusMessage ||
+      "Failed to create your story. Please try again.";
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// Move to chat phase after naming
+const startChat = async () => {
+  if (!characterName.value.trim()) {
+    error.value = "Please give your character a name";
+    return;
+  }
+
+  isLoading.value = true;
+  loadingMessage.value = `${characterName.value} is coming to life...`;
+
+  try {
+    // Replace [CHARACTER] with the actual name
+    const finalStory = storyTemplate.value.replace(
+      /\[CHARACTER\]/g,
+      characterName.value
+    );
+
+    // Initialize conversation with a warm greeting
+    const initialMessage = `Hello! I'm ${characterName.value}. ${
+      finalStory.split(".")[0]
+    }. I'm so happy to meet you!`;
+    chatMessages.value.push({
+      role: "assistant",
+      content: initialMessage,
+    });
+
+    currentPhase.value = "chat";
+    // Set default to second image (Chapter 1 - The Beginning)
+    currentImageIndex.value = 1;
+
+    await nextTick();
+    scrollToBottom();
+  } catch (err) {
+    console.error("Error starting chat:", err);
+    error.value = "Failed to start the conversation";
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// Send message and stream response
+// Send message and stream response
+const sendMessage = async () => {
+  if (!userMessage.value.trim() || isStreaming.value) return;
+
+  const message = userMessage.value.trim();
+  userMessage.value = "";
+
+  // Add user message to chat
+  chatMessages.value.push({
+    role: "user",
+    content: message,
+  });
+
+  await nextTick();
+  scrollToBottom();
+
+  isStreaming.value = true;
+
+  // 為 assistant 創建一個佔位訊息
+  chatMessages.value.push({
+    role: "assistant",
+    content: "",
+  });
+  const assistantMessageIndex = chatMessages.value.length - 1;
+  const decoder = new TextDecoder();
+
+  try {
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        // 確保我們不把最後那個空的 assistant 訊息發送回去
+        messages: chatMessages.value.slice(0, assistantMessageIndex),
+        characterName: characterName.value,
+        characterDescription: characterDescription.value,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Server responded with status: ${response.status}`);
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) {
+      throw new Error("Failed to get response reader");
+    }
+
+    // --- 這是修正的核心部分 ---
+    // 1. 引入一個 buffer 來存儲不完整的數據塊
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      // 2. 將新讀取的數據塊附加到 buffer
+      buffer += decoder.decode(value, { stream: true });
+
+      // 3. 嘗試從 buffer 中按換行符分割出完整的行
+      const lines = buffer.split("\n");
+
+      // 4. (關鍵) 最後一行可能是不完整的，所以我們將它保留在 buffer 中，等待下一次數據
+      buffer = lines.pop() || "";
+
+      for (const line of lines) {
+        if (!line.trim()) continue;
+
+        try {
+          const payload = JSON.parse(line);
+
+          if (payload.type === "text_chunk") {
+            const cleanContent = payload.content.replace(
+              /\[DRAWING:.*?\]/g,
+              ""
+            );
+
+            // 直接更新 assistant 的訊息內容，而不是用變數累加
+            chatMessages.value[assistantMessageIndex].content += cleanContent;
+
+            await nextTick();
+            scrollToBottom();
+          } else if (payload.type === "image_url") {
+            // 如果 assistant 的佔位訊息是空的，可以先移除它
+            if (chatMessages.value[assistantMessageIndex].content === "") {
+              chatMessages.value.splice(assistantMessageIndex, 1);
+            }
+            // 將圖片作為一個獨立的訊息添加
+            chatMessages.value.push({
+              role: "assistant", // 雖然是圖片，但來源是 assistant
+              imageUrl: payload.content, // 假設你有一個 imageUrl 屬性來顯示圖片
+            });
+            chatImages.value.push(payload.content); // 繼續更新你的 chatImages
+
+            await nextTick();
+            scrollToBottom();
+          } else if (payload.type === "done") {
+            // 這個標記現在由 finally 塊處理，這裡可以忽略
+          }
+        } catch (e) {
+          console.warn("Skipping non-JSON line:", line);
+        }
+      }
+    }
+    // --- 修正部分結束 ---
+  } catch (err) {
+    console.error("Error sending message:", err);
+    error.value = "Failed to send message. Please try again.";
+
+    // 如果 assistant 訊息是空的，就把它從歷史記錄中移除
+    if (chatMessages.value[assistantMessageIndex]?.content === "") {
+      chatMessages.value.splice(assistantMessageIndex, 1);
+    }
+  } finally {
+    if (chatMessages.value[assistantMessageIndex]) {
+      chatMessages.value[assistantMessageIndex].content = chatMessages.value[
+        assistantMessageIndex
+      ].content
+        .replace(/\[DRAWING:.*?\]/g, "")
+        .trim();
+    }
+    isStreaming.value = false;
+    // 確保解碼器中剩餘的任何緩存都被處理 (通常是空的)
+    const finalChunk = decoder.decode();
+    if (finalChunk) {
+      // 理論上不應該有，但作為安全措施
+      console.log("Final decoded chunk:", finalChunk);
+    }
+  }
+};
+// Scroll to bottom of chat
+const scrollToBottom = () => {
+  if (chatContainer.value) {
+    chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+  }
+};
+
+// Carousel navigation
+const totalImages = computed(() => {
+  let count = 1; // Original photo
+  if (generatedImageUrl.value) count++; // First generated image
+  count += chatImages.value.length; // Chat-generated images
+  return count;
+});
+
+watch(
+  () => chatImages.value.length, // 我們監控的是陣列的長度
+  (newLength, oldLength) => {
+    // 只有當圖片數量增加時才觸發
+    if (newLength > oldLength) {
+      console.log("New image added to carousel, switching to it.");
+
+      // 使用 nextTick 確保 DOM 已經更新，totalImages 的計算也是最新的
+      nextTick(() => {
+        // 直接將索引設置為最後一張圖片的位置
+        currentImageIndex.value = totalImages.value - 1;
+      });
+    }
+  },
+  {
+    // deep: true // 如果您監控的是物件陣列的內部變化，可能需要 deep，但監控長度不需要
+  }
+);
+
+const scrollCarouselLeft = () => {
+  if (currentImageIndex.value > 0) {
+    currentImageIndex.value--;
+  }
+};
+
+const scrollCarouselRight = () => {
+  if (currentImageIndex.value < totalImages.value - 1) {
+    currentImageIndex.value++;
+  }
+};
+
+// Reset to initial state
+const reset = () => {
+  currentPhase.value = "upload";
+  uploadedImage.value = null;
+  imageBase64.value = "";
+  storyTemplate.value = "";
+  characterDescription.value = "";
+  characterName.value = "";
+  generatedImageUrl.value = "";
+  chatMessages.value = [];
+  chatImages.value = [];
+  userMessage.value = "";
+  error.value = "";
+  currentImageIndex.value = 0;
+};
+</script>
+
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+body {
+  font-family: "Poppins", sans-serif;
+}
+
+/* Soft fade-in animation */
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>
