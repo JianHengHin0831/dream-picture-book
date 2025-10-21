@@ -450,6 +450,38 @@ const loadingMessage = ref("Creating your magical story...");
 const chatContainer = ref(null);
 const currentImageIndex = ref(0);
 
+useHead(() => {
+  // 可根據 currentPhase 變動顯示不同 title
+  let title = "✨ Dream Picture Book ✨";
+  if (currentPhase.value === "upload")
+    title = "Upload Your Magical Photo ✨ | Dream Picture Book";
+  else if (currentPhase.value === "story_display")
+    title = "Your Story is Being Woven 🧵 | Dream Picture Book";
+  else if (currentPhase.value === "chat")
+    title = "Chat with Your Story Character 💫 | Dream Picture Book";
+  else if (currentPhase.value === "summary")
+    title = "Story Summary 🌸 | Dream Picture Book";
+
+  return {
+    title,
+    meta: [
+      {
+        name: "description",
+        content:
+          "Turn your everyday photos into heartwarming AI storybooks. Upload, imagine, and chat with your characters!",
+      },
+      { property: "og:title", content: title },
+      {
+        property: "og:description",
+        content:
+          "Let your objects come alive and share their gentle stories with you ✨",
+      },
+      { property: "og:type", content: "website" },
+      { name: "theme-color", content: "#fbcfe8" },
+    ],
+  };
+});
+
 const handleFileUpload = async (event) => {
   const file = event.target.files[0];
   if (!file) return;
