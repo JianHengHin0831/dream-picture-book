@@ -171,11 +171,7 @@
         <!-- Phase 3: Interactive Chat -->
         <div
           v-if="currentPhase === 'chat'"
-          class="animate-fade-in flex flex-col"
-          :style="{
-            height: 'calc(100vh - 300px)',
-            minHeight: '900px',
-          }"
+          class="animate-fade-in flex flex-col h-[calc(100vh-300px)] min-h-[900px] lg:min-h-[500px]"
         >
           <div
             class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-6 h-full overflow-hidden"
