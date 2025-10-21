@@ -31,9 +31,6 @@ export default defineEventHandler(async (event) => {
 
   try {
     // --- First API Call: Use GPT-4V to generate story template and DALL-E prompt ---
-    console.log(
-      "Step 1: Calling GPT-4V to generate story template and DALL-E prompt..."
-    );
 
     const gptResponse = await fetch(
       "https://api.openai.com/v1/chat/completions",
@@ -86,15 +83,7 @@ export default defineEventHandler(async (event) => {
       throw new Error("Invalid JSON structure from GPT-4V.");
     }
 
-    console.log("Step 1 Success. Story Template:", story_template);
-    console.log(
-      "Step 1 Success. Character Description:",
-      character_description
-    );
-    console.log("Step 1 Success. DALL-E Prompt:", dalle_prompt);
-
     // --- Second API Call: Use DALL-E 3 to generate image ---
-    console.log("Step 2: Calling DALL-E 3 to generate image...");
 
     const dalleResponse = await fetch(
       "https://api.openai.com/v1/images/generations",
@@ -126,8 +115,6 @@ export default defineEventHandler(async (event) => {
     if (!imageUrl) {
       throw new Error("Could not retrieve image URL from DALL-E 3 response.");
     }
-
-    console.log("Step 2 Success. Image URL:", imageUrl);
 
     // --- Return Final Result ---
     // Return story template (with placeholder), character description, and image URL

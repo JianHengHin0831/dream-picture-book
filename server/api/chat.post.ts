@@ -59,13 +59,6 @@ export default defineEventHandler(async (event) => {
   const { messages, characterName, characterDescription } =
     await readBody<ChatRequestBody>(event);
 
-  console.log(
-    "Received chat request with character:",
-    characterName,
-    messages,
-    characterDescription
-  );
-
   // --- Prompt 和 conversation 設置保持不變 ---
   const systemPrompt = `You are now "${characterName}", who is "${characterDescription}".
 
@@ -91,9 +84,6 @@ Your personality is gentle, kind, full of curiosity, and you always see the worl
   }
 
   try {
-    // --- 核心改動 1: 獲取完整回覆 ---
-    // 我們向 OpenAI 發送一個標準的、非流式的請求
-    console.log("Requesting full completion from OpenAI...");
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -103,7 +93,7 @@ Your personality is gentle, kind, full of curiosity, and you always see the worl
       body: JSON.stringify({
         model: "gpt-4o",
         messages: conversation,
-        stream: false, // <-- 關鍵：設置為 false
+        stream: false,
       }),
     });
 
@@ -117,7 +107,6 @@ Your personality is gentle, kind, full of curiosity, and you always see the worl
 
     const completion = await response.json();
     const fullResponse = completion.choices[0]?.message?.content || "";
-    console.log("Received full response:", fullResponse);
 
     return new ReadableStream({
       async start(controller) {
@@ -125,7 +114,6 @@ Your personality is gentle, kind, full of curiosity, and you always see the worl
           const textForTyping = fullResponse
             .replace(/\[DRAWING:.*?\]/g, "")
             .trim();
-          console.log("Simulating stream to client...");
           for (const char of textForTyping) {
             const payload: SsePayload = {
               type: "text_chunk",
@@ -138,12 +126,10 @@ Your personality is gentle, kind, full of curiosity, and you always see the worl
           const drawMatch = fullResponse.match(/\[DRAWING:(.*?)\]/);
           if (drawMatch && drawMatch[1]) {
             const dallePrompt = drawMatch[1].trim();
-            console.log(`Drawing triggered. DALL-E Prompt: ${dallePrompt}`);
 
             generateImage(dallePrompt, openAiApiKey)
               .then((imageUrl: string) => {
                 if (imageUrl) {
-                  console.log("Image generated:", imageUrl);
                   const payload: SsePayload = {
                     type: "image_url",
                     content: imageUrl,

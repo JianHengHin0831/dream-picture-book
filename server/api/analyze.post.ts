@@ -21,7 +21,6 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    console.log("Calling GPT-4o for initial analysis...");
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -63,8 +62,6 @@ export default defineEventHandler(async (event) => {
     const content = JSON.parse(
       data.choices[0].message.content
     ) as GptAnalysisResponse;
-
-    console.log("Analysis successful:", content);
     return content;
   } catch (error: any) {
     console.error("Error in analyze endpoint:", error);
