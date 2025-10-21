@@ -20,30 +20,23 @@ interface SsePayload {
 
 async function generateImage(prompt: string, apiKey: string): Promise<string> {
   try {
-    // const response = await fetch(
-    //   "https://api.openai.com/v1/images/generations",
-    //   {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       Authorization: `Bearer ${apiKey}`,
-    //     },
-    //     body: JSON.stringify({
-    //       model: "dall-e-3",
-    //       prompt: prompt,
-    //       n: 1,
-    //       size: "1024x1024",
-    //       quality: "standard",
-    //     }),
-    //   }
-    // );
-    const response = {
-      ok: true,
-      statusText: "OK",
-      json: async () => ({
-        data: [{ url: "https://example.com/generated-image.png" }],
-      }),
-    };
+    const response = await fetch(
+      "https://api.openai.com/v1/images/generations",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "dall-e-3",
+          prompt: prompt,
+          n: 1,
+          size: "1024x1024",
+          quality: "standard",
+        }),
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`DALL-E API error: ${response.statusText}`);
