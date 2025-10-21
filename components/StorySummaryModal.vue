@@ -299,4 +299,14 @@ onUnmounted(() => {
 .animate-fade-in {
   animation: fadeIn 0.8s ease-in-out;
 }
+
+/* Hide scrollbar while keeping scroll functionality */
+.overflow-y-auto::-webkit-scrollbar {
+  display: none;
+}
+
+.overflow-y-auto {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 </style>

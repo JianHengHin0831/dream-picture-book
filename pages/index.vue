@@ -451,7 +451,6 @@ const chatContainer = ref(null);
 const currentImageIndex = ref(0);
 
 useHead(() => {
-  // 可根據 currentPhase 變動顯示不同 title
   let title = "✨ Dream Picture Book ✨";
   if (currentPhase.value === "upload")
     title = "Upload Your Magical Photo ✨ | Dream Picture Book";
