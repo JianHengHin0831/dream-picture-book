@@ -115,7 +115,6 @@ Remember to keep the tone gentle, healing, and warm - like a picture book charac
       jsonString = jsonString.substring(7, jsonString.length - 3).trim();
     }
 
-    // 解析清理後的 JSON 字串
     const result = JSON.parse(jsonString);
 
     return {
@@ -125,7 +124,6 @@ Remember to keep the tone gentle, healing, and warm - like a picture book charac
   } catch (err) {
     console.error("Error generating summary:", err);
 
-    // Fallback responses
     return {
       storyNarrative: `When ${characterName} met you, it was the beginning of something magical. Your conversation was filled with warmth and wonder, creating a memory that would last forever.`,
       farewellMessage: `Thank you for seeing the beauty in me and sharing this special moment together.`,

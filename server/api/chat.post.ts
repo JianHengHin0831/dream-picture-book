@@ -1,7 +1,7 @@
 import { ok } from "assert";
+import { stat } from "fs";
 import { defineEventHandler, readBody } from "h3";
 
-// --- 所有介面定義和輔助函式保持不變 ---
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
@@ -19,7 +19,6 @@ interface SsePayload {
 }
 
 async function generateImage(prompt: string, apiKey: string): Promise<string> {
-  // ... (您的 generateImage 函式完全不變)
   try {
     // const response = await fetch(
     //   "https://api.openai.com/v1/images/generations",
@@ -40,11 +39,12 @@ async function generateImage(prompt: string, apiKey: string): Promise<string> {
     // );
     const response = {
       ok: true,
-      statusText: "",
+      statusText: "OK",
       json: async () => ({
         data: [{ url: "https://example.com/generated-image.png" }],
       }),
-    }; // Mock response for testing
+    };
+
     if (!response.ok) {
       throw new Error(`DALL-E API error: ${response.statusText}`);
     }
@@ -56,7 +56,6 @@ async function generateImage(prompt: string, apiKey: string): Promise<string> {
   }
 }
 
-// 輔助函式：用於製造延遲
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -66,6 +65,13 @@ export default defineEventHandler(async (event) => {
   const openAiApiKey = config.openAiApiKey as string;
   const { messages, characterName, characterDescription } =
     await readBody<ChatRequestBody>(event);
+
+  console.log(
+    "Received chat request with character:",
+    characterName,
+    messages,
+    characterDescription
+  );
 
   // --- Prompt 和 conversation 設置保持不變 ---
   const systemPrompt = `You are now "${characterName}", who is "${characterDescription}".
@@ -120,11 +126,9 @@ Your personality is gentle, kind, full of curiosity, and you always see the worl
     const fullResponse = completion.choices[0]?.message?.content || "";
     console.log("Received full response:", fullResponse);
 
-    // --- 核心改動 2: 使用您自己的 ReadableStream 來模擬流式輸出 ---
     return new ReadableStream({
       async start(controller) {
         try {
-          // 模擬打字機效果，逐字發送
           const textForTyping = fullResponse
             .replace(/\[DRAWING:.*?\]/g, "")
             .trim();
@@ -135,10 +139,9 @@ Your personality is gentle, kind, full of curiosity, and you always see the worl
               content: char,
             };
             controller.enqueue(JSON.stringify(payload) + "\n");
-            await sleep(30); // 控制打字速度
+            await sleep(30);
           }
 
-          // 文字發送完畢後，處理繪圖邏輯
           const drawMatch = fullResponse.match(/\[DRAWING:(.*?)\]/);
           if (drawMatch && drawMatch[1]) {
             const dallePrompt = drawMatch[1].trim();

@@ -113,15 +113,12 @@ export default defineEventHandler(async (event) => {
     //     }),
     //   }
     // );
-
     const dalleResponse = {
       ok: true,
-      statusText: "",
       json: async () => ({
         data: [{ url: "https://example.com/generated-image.png" }],
       }),
     };
-
     if (!dalleResponse.ok) {
       const errorData = await dalleResponse.json();
       console.error("OpenAI DALL-E 3 API Error:", errorData);

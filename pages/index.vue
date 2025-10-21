@@ -435,28 +435,24 @@
 
 <script setup>
 import { ref, nextTick, computed, watch } from "vue";
-
-// Phases: upload -> story_display -> naming -> chat
 const currentPhase = ref("upload");
 
-// State management
 const uploadedImage = ref(null);
 const imageBase64 = ref("");
-const storyTemplate = ref(""); // Story with [CHARACTER] placeholder
-const characterDescription = ref(""); // AI-generated description
-const characterName = ref(""); // User-provided name
-const generatedImageUrl = ref(""); // Initial story illustration
+const storyTemplate = ref("");
+const characterDescription = ref("");
+const characterName = ref("");
+const generatedImageUrl = ref("");
 const chatMessages = ref([]);
-const chatImages = ref([]); // Store images generated during chat
+const chatImages = ref([]);
 const userMessage = ref("");
 const isLoading = ref(false);
 const isStreaming = ref(false);
 const error = ref("");
 const loadingMessage = ref("Creating your magical story...");
 const chatContainer = ref(null);
-const currentImageIndex = ref(0); // For carousel navigation
+const currentImageIndex = ref(0);
 
-// Handle image upload and generate story
 const handleFileUpload = async (event) => {
   const file = event.target.files[0];
   if (!file) return;
@@ -466,13 +462,11 @@ const handleFileUpload = async (event) => {
     uploadedImage.value = e.target.result;
     imageBase64.value = e.target.result.split(",")[1];
 
-    // Immediately generate story and image
     await generateStoryAndImage();
   };
   reader.readAsDataURL(file);
 };
 
-// Call API to generate story template and image
 const generateStoryAndImage = async () => {
   isLoading.value = true;
   loadingMessage.value = "The storyteller is weaving your tale...";
@@ -487,7 +481,6 @@ const generateStoryAndImage = async () => {
     characterDescription.value = response.characterDescription;
     generatedImageUrl.value = response.imageUrl;
 
-    // Move to story display phase
     currentPhase.value = "story_display";
   } catch (err) {
     console.error("Failed to generate story:", err);
@@ -499,7 +492,6 @@ const generateStoryAndImage = async () => {
   }
 };
 
-// Move to chat phase after naming
 const startChat = async () => {
   if (!characterName.value.trim()) {
     error.value = "Please give your character a name";
@@ -510,13 +502,11 @@ const startChat = async () => {
   loadingMessage.value = `${characterName.value} is coming to life...`;
 
   try {
-    // Replace [CHARACTER] with the actual name
     const finalStory = storyTemplate.value.replace(
       /\[CHARACTER\]/g,
       characterName.value
     );
 
-    // Initialize conversation with a warm greeting
     const initialMessage = `Hello! I'm ${characterName.value}. ${
       finalStory.split(".")[0]
     }. I'm so happy to meet you!`;
@@ -539,15 +529,13 @@ const startChat = async () => {
   }
 };
 
-// Send message and stream response
-// Send message and stream response
 const sendMessage = async () => {
   if (!userMessage.value.trim() || isStreaming.value) return;
 
   const message = userMessage.value.trim();
   userMessage.value = "";
+  console.log("User message:", message);
 
-  // Add user message to chat
   chatMessages.value.push({
     role: "user",
     content: message,
@@ -557,8 +545,6 @@ const sendMessage = async () => {
   scrollToBottom();
 
   isStreaming.value = true;
-
-  // 為 assistant 創建一個佔位訊息
   chatMessages.value.push({
     role: "assistant",
     content: "",
@@ -567,14 +553,21 @@ const sendMessage = async () => {
   const decoder = new TextDecoder();
 
   try {
+    const messagesForApi = chatMessages.value
+      .slice(0, assistantMessageIndex)
+      .filter((msg) => msg.content)
+      .map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+      }));
+
     const response = await fetch("/api/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        // 確保我們不把最後那個空的 assistant 訊息發送回去
-        messages: chatMessages.value.slice(0, assistantMessageIndex),
+        messages: messagesForApi,
         characterName: characterName.value,
         characterDescription: characterDescription.value,
       }),
@@ -589,21 +582,13 @@ const sendMessage = async () => {
       throw new Error("Failed to get response reader");
     }
 
-    // --- 這是修正的核心部分 ---
-    // 1. 引入一個 buffer 來存儲不完整的數據塊
     let buffer = "";
 
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-
-      // 2. 將新讀取的數據塊附加到 buffer
       buffer += decoder.decode(value, { stream: true });
-
-      // 3. 嘗試從 buffer 中按換行符分割出完整的行
       const lines = buffer.split("\n");
-
-      // 4. (關鍵) 最後一行可能是不完整的，所以我們將它保留在 buffer 中，等待下一次數據
       buffer = lines.pop() || "";
 
       for (const line of lines) {
@@ -617,40 +602,33 @@ const sendMessage = async () => {
               /\[DRAWING:.*?\]/g,
               ""
             );
-
-            // 直接更新 assistant 的訊息內容，而不是用變數累加
             chatMessages.value[assistantMessageIndex].content += cleanContent;
 
             await nextTick();
             scrollToBottom();
           } else if (payload.type === "image_url") {
-            // 如果 assistant 的佔位訊息是空的，可以先移除它
             if (chatMessages.value[assistantMessageIndex].content === "") {
               chatMessages.value.splice(assistantMessageIndex, 1);
             }
-            // 將圖片作為一個獨立的訊息添加
             chatMessages.value.push({
-              role: "assistant", // 雖然是圖片，但來源是 assistant
-              imageUrl: payload.content, // 假設你有一個 imageUrl 屬性來顯示圖片
+              role: "assistant",
+              imageUrl: payload.content,
             });
-            chatImages.value.push(payload.content); // 繼續更新你的 chatImages
+            chatImages.value.push(payload.content);
 
             await nextTick();
             scrollToBottom();
           } else if (payload.type === "done") {
-            // 這個標記現在由 finally 塊處理，這裡可以忽略
           }
         } catch (e) {
           console.warn("Skipping non-JSON line:", line);
         }
       }
     }
-    // --- 修正部分結束 ---
+    isStreaming.value = false;
   } catch (err) {
     console.error("Error sending message:", err);
     error.value = "Failed to send message. Please try again.";
-
-    // 如果 assistant 訊息是空的，就把它從歷史記錄中移除
     if (chatMessages.value[assistantMessageIndex]?.content === "") {
       chatMessages.value.splice(assistantMessageIndex, 1);
     }
@@ -662,46 +640,35 @@ const sendMessage = async () => {
         .replace(/\[DRAWING:.*?\]/g, "")
         .trim();
     }
-    isStreaming.value = false;
-    // 確保解碼器中剩餘的任何緩存都被處理 (通常是空的)
     const finalChunk = decoder.decode();
     if (finalChunk) {
-      // 理論上不應該有，但作為安全措施
       console.log("Final decoded chunk:", finalChunk);
     }
   }
 };
-// Scroll to bottom of chat
 const scrollToBottom = () => {
   if (chatContainer.value) {
     chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
   }
 };
 
-// Carousel navigation
 const totalImages = computed(() => {
-  let count = 1; // Original photo
-  if (generatedImageUrl.value) count++; // First generated image
-  count += chatImages.value.length; // Chat-generated images
+  let count = 1;
+  if (generatedImageUrl.value) count++;
+  count += chatImages.value.length;
   return count;
 });
 
 watch(
-  () => chatImages.value.length, // 我們監控的是陣列的長度
+  () => chatImages.value.length,
   (newLength, oldLength) => {
-    // 只有當圖片數量增加時才觸發
     if (newLength > oldLength) {
       console.log("New image added to carousel, switching to it.");
 
-      // 使用 nextTick 確保 DOM 已經更新，totalImages 的計算也是最新的
       nextTick(() => {
-        // 直接將索引設置為最後一張圖片的位置
         currentImageIndex.value = totalImages.value - 1;
       });
     }
-  },
-  {
-    // deep: true // 如果您監控的是物件陣列的內部變化，可能需要 deep，但監控長度不需要
   }
 );
 
@@ -722,7 +689,7 @@ const allSummaryImages = computed(() => {
   const images = [uploadedImage.value];
   if (generatedImageUrl.value) images.push(generatedImageUrl.value);
   images.push(...chatImages.value);
-  return images.filter((img) => img); // Filter out null/undefined
+  return images.filter((img) => img);
 });
 
 // End chat and show summary

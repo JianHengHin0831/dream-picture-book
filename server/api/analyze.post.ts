@@ -1,10 +1,8 @@
-// server/api/analyze.post.ts
-
 import { defineEventHandler, readBody } from "h3";
 
 interface GptAnalysisResponse {
-  story_template: string; // e.g., "在一個被遺忘的角落，一個孤單的 [主角名字] 靜靜地等待著..."
-  character_description: string; // e.g., "一個有著溫暖棕色外殼和害羞眼神的咖啡杯"
+  story_template: string;
+  character_description: string;
 }
 
 export default defineEventHandler(async (event) => {
